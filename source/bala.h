@@ -2,10 +2,10 @@
 #define BALA_H
 
 
-class bala
+class Bala
 {
 public:
-    bala();
+    Bala();
 };
 
 #endif // BALA_H

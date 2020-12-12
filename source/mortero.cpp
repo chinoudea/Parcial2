@@ -1,6 +1,6 @@
 #include "mortero.h"
 
-mortero::mortero()
+Mortero::Mortero()
 {
 
 }

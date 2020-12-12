@@ -2,10 +2,10 @@
 #define MORTERO_H
 
 
-class mortero
+class Mortero
 {
 public:
-    mortero();
+    Mortero();
 };
 
 #endif // MORTERO_H

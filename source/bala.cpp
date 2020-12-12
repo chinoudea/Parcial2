@@ -1,6 +1,6 @@
 #include "bala.h"
 
-bala::bala()
+Bala::Bala()
 {
 
 }

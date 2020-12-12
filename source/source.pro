@@ -5,9 +5,11 @@ CONFIG -= qt
 
 SOURCES += \
         bala.cpp \
+        escenario.cpp \
         main.cpp \
         mortero.cpp
 
 HEADERS += \
     bala.h \
+    escenario.h \
     mortero.h
