@@ -4,4 +4,10 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 SOURCES += \
-        main.cpp
+        bala.cpp \
+        main.cpp \
+        mortero.cpp
+
+HEADERS += \
+    bala.h \
+    mortero.h
