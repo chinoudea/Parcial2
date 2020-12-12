@@ -3,12 +3,12 @@
 Escenario::Escenario(double dist)
 {
     distancia = dist;
-    c_ofensivo = new Mortero(0, 0);
-    c_defensivo = new Mortero(distancia, 0);
+    c_ofensivo =  Mortero();
+    c_defensivo = Mortero(distancia, 0);
 }
 
 Escenario::Escenario(double dist, double alt_ofensivo, double alt_defensivo) {
     distancia = dist;
-    c_ofensivo = new Mortero(0, alt_ofensivo);
-    c_defensivo = new Mortero(distancia, alt_defensivo);
+    c_ofensivo = Mortero(0, alt_ofensivo);
+    c_defensivo = Mortero(distancia, alt_defensivo);
 }

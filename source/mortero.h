@@ -5,7 +5,11 @@
 class Mortero
 {
 public:
+    double posicionX;
+    double posicionY;
     Mortero();
+    Mortero(double, double);
+    void disparar(int tipo, double velocidad, double angulo);
 };
 
 #endif // MORTERO_H
