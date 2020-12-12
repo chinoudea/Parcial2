@@ -37,12 +37,12 @@ int main()
 
 int showMenu() {
     int opt=0;
-    cout << endl << "MENU DE OPCIONES" << endl << endl;
-    cout << "1. Generar disparos (al menos tres) ofensivos que comprometan la integridad del canion defensivo." << endl;
-    cout << "2. Generar disparos (al menos tres) defensivos que comprometan la integridad del canion ofensivo." << endl;
-    cout << "3. Dado un disparo ofensivo, generar (al menos tres) disparos defensivos, que impidan la destruccion del canion" << endl << "   defensivo sin importar el canion ofensivo" << endl;
-    cout << "4. Dado un disparo ofensivo, generar (al menos tres) disparos defensivos, que impidan la destruccion de ambos caniones." << endl;
-    cout << "5. Dado un disparo ofensivo efectivo, y un disparo defensivo efectivo para dicho ataque, generar (al menos tres)" << endl << "   disparos ofensivos, que neutralicen la defensa y permitan la efectividad del disparo ofensivo inicial." << endl;
+    cout << endl << "\t*********   MENU DE OPCIONES   *********" << endl << endl;
+    cout << "1. Generar disparos (al menos tres) ofensivos que comprometan la integridad del canion defensivo." << endl<< endl;
+    cout << "2. Generar disparos (al menos tres) defensivos que comprometan la integridad del canion ofensivo." << endl<< endl;
+    cout << "3. Dado un disparo ofensivo, generar (al menos tres) disparos defensivos, que impidan la destruccion del canion" << endl << "   defensivo sin importar el canion ofensivo" << endl<< endl;
+    cout << "4. Dado un disparo ofensivo, generar (al menos tres) disparos defensivos, que impidan la destruccion de ambos caniones." << endl<< endl;
+    cout << "5. Dado un disparo ofensivo efectivo, y un disparo defensivo efectivo para dicho ataque, generar (al menos tres)" << endl << "   disparos ofensivos, que neutralicen la defensa y permitan la efectividad del disparo ofensivo inicial." << endl<< endl;
     cout << "0. Salir" << endl;
     cout << endl << "Indique una opcion: ";
     cin >> opt;
@@ -66,12 +66,6 @@ void playOption(int option) {
             break;
         case 5:
             miEscenario.simularOfensivoEfectivo();
-            break;
-        case 6:
-            miEscenario.loadConfig();
-            break;
-        case 7:
-            miEscenario.loadRandom();
             break;
         case 0:
             return;
