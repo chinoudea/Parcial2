@@ -13,6 +13,10 @@ public:
     Mortero c_defensivo;
     double distancia;
     double tiempo;
+    void simularOfensivos();
+    void simularDefensivos();
+    void simularDefensivos(bool);
+    void simularOfensivoEfectivo();
 };
 
 #endif // ESCENARIO_H

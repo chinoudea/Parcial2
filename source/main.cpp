@@ -53,25 +53,25 @@ void playOption(int option) {
     // Se valida la opcion ingresada
     switch (option) {
         case 1:
-            MiRed.show();
+            miEscenario.simularOfensivos();
             break;
         case 2:
-            MiRed.addRouter();
+            miEscenario.simularDefensivos();
             break;
         case 3:
-            MiRed.removeRouter();
+            miEscenario.simularDefensivos(false);
             break;
         case 4:
-            MiRed.pathCalculate();
+            miEscenario.simularDefensivos(true);
             break;
         case 5:
-            MiRed.pathCalculate();
+            miEscenario.simularOfensivoEfectivo();
             break;
         case 6:
-            MiRed.loadConfig();
+            miEscenario.loadConfig();
             break;
         case 7:
-            MiRed.loadRandom();
+            miEscenario.loadRandom();
             break;
         case 0:
             return;
