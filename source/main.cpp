@@ -50,6 +50,7 @@ int showMenu() {
 }
 
 void playOption(int option) {
+    cout << endl;
     // Se valida la opcion ingresada
     switch (option) {
         case 1:

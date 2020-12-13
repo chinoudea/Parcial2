@@ -16,6 +16,17 @@ Bala::Bala(double posIniX, double posIniY, double rango)
     rangoDetonacion = rango;
 }
 
+Bala::Bala(double posIniX, double posIniY, double rango, double velIni, double angIni)
+{
+    posicionX = posIniX;
+    posicionY = posIniY;
+    posInicialX = posIniX;
+    posInicialY = posIniY;
+    rangoDetonacion = rango;
+    velocidadInicial = velIni;
+    anguloInicial = angIni;
+}
+
 bool Bala::sensarCercania(double X, double Y)
 {
         double deltaX = posicionX - X;

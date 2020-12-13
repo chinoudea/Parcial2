@@ -17,6 +17,7 @@ public:
     double pi = 2*acos(0.0);
     Bala();
     Bala(double posIniX, double posIniY, double rango);
+    Bala(double posIniX, double posIniY, double rango, double velIni, double angIni);
     bool sensarCercania(double X, double Y);
     void calcularPosicion(double *t);
 private:
