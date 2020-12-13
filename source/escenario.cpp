@@ -199,6 +199,120 @@ void Escenario::simularDefensivos(bool protegerOfensivo)
 }
 
 void Escenario::simularOfensivoEfectivo()
-{
 
+{
+    double inputVelocidad, inputAngulo;
+    double tiempoOfensivo, tiempoOfensivoEfectivo, tiempoDefensivo, tiempoDefensivoEfectivo;
+    bool ofensivoEfectivo = false;
+    bool defensivoEfectivo = false;
+    bool neutralizadorEfectivo = false;
+    cout << endl << "Por favor ingrese los parametros de configuracion de disparo ofensivo" << endl;
+    cout << "Indique la velocidad inicial (m/s) del disparo: ";
+    cin >> inputVelocidad;
+    cout << "Indique el angulo en grados del disparo: ";
+    cin >> inputAngulo;
+    Bala ofensiva = Bala(c_ofensivo.posicionX, c_ofensivo.posicionY, 0.05*distancia, inputVelocidad, inputAngulo);
+    // Lo primero es saber si el disparo ofensivo con esos parametros puede hacer daño, se itera en tiempo para averiguarlo.
+    for (tiempo=0.1; ; tiempo+=0.01) {
+        ofensiva.calcularPosicion(&tiempo);
+        // Se valida la cercania al objetivo
+        if (ofensiva.sensarCercania(c_defensivo.posicionX, c_defensivo.posicionY)) {
+            tiempoOfensivoEfectivo = tiempo;
+            ofensivoEfectivo = true;
+            break;
+        }
+        // Se limita para que el escenario tenga piso en 0, asi que si se dan valores negativos no se tienen en cuenta.
+        if (ofensiva.posicionY<0) break;
+        // Si la posicion en X ya supera la distancia mas el rango de daño, se aborta la iteracion
+        if (ofensiva.posicionX > (c_defensivo.posicionX + ofensiva.rangoDetonacion)) break;
+    }
+    if (!ofensivoEfectivo) {
+        cout << "Los parametros indicados no pueden hacer danio al canion defensivo" << endl;
+        system("PAUSE");
+    } else { // Si puede hacer daño al cañon defensivo
+        //Se verifica si hay tiempo de reaccionar al ataque, ya que la informacion llega con 2 segundos de retraso.
+        if (tiempoOfensivoEfectivo<=2) {
+            cout << endl << "No es posible defenderse de un ataque con esos parametros." << endl;
+        } else {
+            cout << endl << "Por favor ingrese los parametros de configuracion de disparo defensivo" << endl;
+            cout << "Indique la velocidad inicial (m/s) del disparo: ";
+            cin >> inputVelocidad;
+            cout << "Indique el angulo en grados del disparo: ";
+            cin >> inputAngulo;
+            // Se crea la bala defensiva
+            Bala defensiva = Bala(c_defensivo.posicionX, c_defensivo.posicionY, (0.025 * distancia), inputVelocidad, inputAngulo);
+            //Se valida si los parametros defensivos si evitarian ataque.
+            for (tiempo=0.1; ; tiempo+=0.01) {
+                tiempoOfensivo = tiempo + 2; // La bala ofensiva ya lleva 2 segundos en vuelo
+                defensiva.calcularPosicion(&tiempo);
+                ofensiva.calcularPosicion(&tiempoOfensivo);
+                // Se valida la cercania al objetivo
+                if (defensiva.sensarCercania(ofensiva.posicionX, ofensiva.posicionY)) {
+                    // Si el tiempo logrado es mayor al tiempo en el que el cañon ofensivo logra hacer daño, no sirven estos parametros.
+                    if ((tiempo + 2) >= tiempoOfensivoEfectivo ) break;
+                    defensivoEfectivo = true;
+                    // Se guarda el tiempo y posicion en el que la defensa seria efectiva
+                    tiempoDefensivoEfectivo = tiempo;
+                    break;
+                }
+                // Se limita para que el escenario tenga piso en 0, asi que si se dan valores negativos no se tienen en cuenta.
+                if (defensiva.posicionY<0) break;
+                // Si la posicion en X ya supera la posicion del cañon ofensivo mas el rango de daño, no habria forma de evitar la bala ofensiva
+                if (defensiva.posicionX < (c_ofensivo.posicionX - defensiva.rangoDetonacion)) break;
+            }
+            if (!defensivoEfectivo) {
+                cout << endl << "Los parametros indicados no pueden evitar el ataque del canion ofensivo." << endl;
+                system("PAUSE");
+            } else { // Si puede evitar el ataque ofensivo
+                //Se verifica si hay tiempo de reaccionar con una bala q neutralice la defensa, ya que la informacion llega con un segundo de retraso.
+                if (tiempoDefensivoEfectivo<=1) {
+                    cout << endl << "No es posible neutralizar la defensa con esos parametros." << endl;
+                } else {
+                    // Se imprimen resultados
+                    cout << endl;
+                    cout << "Para un disparo ofensivo con angulo " << ofensiva.anguloInicial << " y velocidad " << ofensiva.velocidadInicial << endl;
+                    cout << "Se activo un disparo defensivo con angulo " << defensiva.anguloInicial << " y velocidad " << defensiva.velocidadInicial << endl;
+                    cout << "Para lograr neutralizar la defensa se presentan las siguientes opciones:" << endl;
+                    // Se crea bala para neutralizar defensa.
+                    Bala neutralizadora = Bala ( c_ofensivo.posicionX, c_ofensivo.posicionY, (0.005*distancia));
+                    // Se iterara en varios angulos para ofrecer varias opciones de neutralizacion
+                    for (int i=0; i<3; i++) {
+                        neutralizadorEfectivo = false;
+                        neutralizadora.anguloInicial = angTest[i];
+                        //Se itera en velocidad inicial
+                        for (double v=0.1; ; v+=0.01) {
+                            neutralizadora.velocidadInicial = v;
+                            //Se itera en tiempo
+                            for (tiempo=0.1; ; tiempo+=0.01) {
+                                tiempoDefensivo = tiempo + 1; // La bala defensiva ya lleva 1 segundo en vuelo.
+                                neutralizadora.calcularPosicion(&tiempo);
+                                defensiva.calcularPosicion(&tiempoDefensivo);
+                                // Se valida la cercania al objetivo
+                                if (neutralizadora.sensarCercania(defensiva.posicionX, defensiva.posicionY)) {
+                                    // Si el tiempo logrado es mayor al tiempo en el que el cañon defensivo logra hacer daño, no sirven estos parametros.
+                                    if (tiempoDefensivo >= tiempoDefensivoEfectivo ) break;
+                                    neutralizadorEfectivo = true;
+                                    cout << endl;
+                                    cout << "Disparo con un angulo de " << neutralizadora.anguloInicial << " grados y velocidad inicial de " << neutralizadora.velocidadInicial << " m/s" << endl;
+                                    cout << "que logra evitar el disparo defensivo en las coordenas X= " << neutralizadora.posicionX << " y Y= " << neutralizadora.posicionY << " en un tiempo de " << tiempo + 3 << " s despues de disparada la bala ofensiva inicial." <<endl;
+                                    cout << "La bala defensiva logra recorrer " << (distancia-defensiva.posicionX) << " m  en el eje X y estaba a una altura de " << defensiva.posicionY << " m" << endl;
+                                }
+                                // Se limita para que el escenario tenga piso en 0, asi que si se dan valores negativos no se tienen en cuenta.
+                                if (neutralizadora.posicionY<0) break;
+                                // Si la posicion en X ya supera la distancia mas el rango de daño, se aborta la iteracion
+                                if (neutralizadora.posicionX > (c_defensivo.posicionX + neutralizadora.rangoDetonacion)) break;
+                            }
+                            // Si ya se encontro resultado se deja de iterar en velocidad.
+                            if (neutralizadorEfectivo) break;
+                        }
+                    }
+                    // Se da informacion sobre recorrido de bala ofensiva.
+                    ofensiva.calcularPosicion(&tiempoOfensivoEfectivo);
+                    cout << "Con cualqiera de las opciones anteriores la bala ofensiva puede seguir su curso y hara daño al canion defensivo." << endl;
+                    cout << "Tras recorrer " << ofensiva.posicionX << " m en el eje X y a una altura de " << ofensiva.posicionY << " m en un tiempo de "  << tiempoOfensivoEfectivo << " s." << endl;
+                    system("PAUSE");
+                }
+            }
+        }
+    }
 }
