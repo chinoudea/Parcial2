@@ -97,7 +97,7 @@ void Escenario::simularDefensivos()
 
 void Escenario::simularDefensivos(bool protegerOfensivo)
 {
-    double Voo, angO, tiempoOfensivo;
+    double Voo, angO, tiempoOfensivo, tod;
     bool flag = false;
     cout << endl << "Por favor ingrese los parametros de configuracion de disparo ofensivo" << endl;
     cout << "Indique la velocidad inicial (m/s) del disparo: ";
@@ -110,6 +110,7 @@ void Escenario::simularDefensivos(bool protegerOfensivo)
         ofensiva.calcularPosicion(&tiempo);
         // Se valida la cercania al objetivo
         if (ofensiva.sensarCercania(c_defensivo.posicionX, c_defensivo.posicionY)) {
+            tod = tiempo;
             flag = true;
             break;
         }
@@ -142,6 +143,8 @@ void Escenario::simularDefensivos(bool protegerOfensivo)
                         ofensiva.calcularPosicion(&tiempoOfensivo);
                         // Se valida la cercania al objetivo
                         if (defensiva.sensarCercania(ofensiva.posicionX, ofensiva.posicionY)) {
+                            // Si el tiempo logrado es mayor al tiempo en el que el cañon ofensivo logra hacer daño, no sirven estos parametros.
+                            if ((tiempo + 2) >= tod ) break;
                             flag = true;
                             cout << "Para angulo " << angTest[i] << " y velocidad " << v << " se logra generar danio en X=" << defensiva.posicionX << " y Y=" << defensiva.posicionY << " en tiempo " << tiempo << " segundos."<<endl;
                             break;
@@ -155,11 +158,16 @@ void Escenario::simularDefensivos(bool protegerOfensivo)
                     if (flag) break;
                 }
             }
-        // Se da tiempo al usuario para que lea los resultados
-        cout << endl;
-        system("PAUSE");
+            // Se da tiempo al usuario para que lea los resultados
+            cout << endl;
+            system("PAUSE");
+        }
 
+    } else {
+        cout << "Los parametros indicados no pueden hacer danio al canion defensivo" << endl;
+        system("PAUSE");
     }
+
 }
 
 void Escenario::simularOfensivoEfectivo()
