@@ -97,7 +97,8 @@ void Escenario::simularDefensivos()
 
 void Escenario::simularDefensivos(bool protegerOfensivo)
 {
-    double Voo, angO, tiempoOfensivo, tod;
+    double Voo, angO, tiempoOfensivo, tiempoOfensivoEfectivo;
+    double posicionXDefensivo, posicionYDefensivo, tiempoDefensivo;
     bool flag = false;
     cout << endl << "Por favor ingrese los parametros de configuracion de disparo ofensivo" << endl;
     cout << "Indique la velocidad inicial (m/s) del disparo: ";
@@ -110,7 +111,7 @@ void Escenario::simularDefensivos(bool protegerOfensivo)
         ofensiva.calcularPosicion(&tiempo);
         // Se valida la cercania al objetivo
         if (ofensiva.sensarCercania(c_defensivo.posicionX, c_defensivo.posicionY)) {
-            tod = tiempo;
+            tiempoOfensivoEfectivo = tiempo;
             flag = true;
             break;
         }
@@ -144,18 +145,45 @@ void Escenario::simularDefensivos(bool protegerOfensivo)
                         // Se valida la cercania al objetivo
                         if (defensiva.sensarCercania(ofensiva.posicionX, ofensiva.posicionY)) {
                             // Si el tiempo logrado es mayor al tiempo en el que el cañon ofensivo logra hacer daño, no sirven estos parametros.
-                            if ((tiempo + 2) >= tod ) break;
-                            flag = true;
-                            cout << "Para angulo " << angTest[i] << " y velocidad " << v << " se logra generar danio en X=" << defensiva.posicionX << " y Y=" << defensiva.posicionY << " en tiempo " << tiempo << " segundos."<<endl;
-                            break;
+                            if ((tiempo + 2) >= tiempoOfensivoEfectivo ) break;
+                            // Se guarda el tiempo y posicion en el que la defensa seria efectiva
+                            tiempoDefensivo = tiempo;
+                            posicionXDefensivo = defensiva.posicionX;
+                            posicionYDefensivo = defensiva.posicionY;
+                            // Se analiza si este disparo de defensa no hara daño al cañon ofensivo.
+                            if (protegerOfensivo) {
+                                //se sigue iterando en el tiempo para validar si hara daño al cañon ofensivo
+                                for (;;tiempo+=0.01) {
+                                    defensiva.calcularPosicion(&tiempo);
+                                    if (defensiva.sensarCercania(c_ofensivo.posicionX,c_ofensivo.posicionY)) {
+                                        break;
+                                    }
+                                    // Se limita para que el escenario tenga piso en 0, asi que si se dan valores negativos no se tienen en cuenta.
+                                    if (defensiva.posicionY<0) {
+                                        flag=true;
+                                        break;
+                                    }
+                                    // Si la posicion en X ya supera la distancia mas el rango de daño, se aborta la iteracion
+                                    if (defensiva.posicionX < (c_ofensivo.posicionX - defensiva.rangoDetonacion)) {
+                                        flag=true;
+                                        break;
+                                    }
+                                }
+                            } else {
+                                flag = true;
+                                break;
+                            }
                         }
                         // Se limita para que el escenario tenga piso en 0, asi que si se dan valores negativos no se tienen en cuenta.
                         if (defensiva.posicionY<0) break;
                         // Si la posicion en X ya supera la distancia mas el rango de daño, se aborta la iteracion
-                        if (defensiva.posicionX < (c_ofensivo.posicionX + defensiva.rangoDetonacion)) break;
+                        if (defensiva.posicionX < c_ofensivo.posicionX) break;
                     }
                     // Si ya se encontro resultado se deja de iterar en velocidad.
-                    if (flag) break;
+                    if (flag) {
+                        cout << "Para angulo " << angTest[i] << " y velocidad " << v << " se logra generar danio en X=" << posicionXDefensivo << " y Y=" << posicionYDefensivo << " en tiempo " << tiempoDefensivo+2 << " segundos."<<endl;
+                        break;
+                    }
                 }
             }
             // Se da tiempo al usuario para que lea los resultados
