@@ -31,24 +31,21 @@ void Escenario::simularOfensivos()
         flag = false;
         ofensiva.anguloInicial = angTest[i];
         //Se itera en velocidad inicial
-        for (double v=0.5; v<1000; v+=0.5) {
+        for (double v=0.1; v<1000; v+=0.1) {
             ofensiva.velocidadInicial = v;
             //Se itera en tiempo
-            for (tiempo=0.1; tiempo<1000; tiempo+=0.1) {
+            for (tiempo=0.1; tiempo<1000; tiempo+=0.01) {
                 ofensiva.calcularPosicion(&tiempo);
-                // Se limita para que el escenario tenga piso en 0,
-                // asi que si se dan valores negativos no se tienen en cuenta.
-                if (ofensiva.posicionY<0)
-                    break;
-                // Si la posicion en X ya supera la distancia mas el rango de daño, se aborta la iteracion
-                if (ofensiva.posicionX > (c_defensivo.posicionX + ofensiva.rangoDetonacion))
-                    break;
                 // Se valida la cercania al objetivo
                 if (ofensiva.sensarCercania(c_defensivo.posicionX, c_defensivo.posicionY)) {
                     flag = true;
                     cout << "Para angulo " << angTest[i] << " y velocidad " << v << " se logra generar danio en X=" << ofensiva.posicionX << " y Y=" << ofensiva.posicionY << " en tiempo " << tiempo << " segundos."<<endl;
                     break;
                 }
+                // Se limita para que el escenario tenga piso en 0, asi que si se dan valores negativos no se tienen en cuenta.
+                if (ofensiva.posicionY<0) break;
+                // Si la posicion en X ya supera la distancia mas el rango de daño, se aborta la iteracion
+                if (ofensiva.posicionX > (c_defensivo.posicionX + ofensiva.rangoDetonacion)) break;
             }
             if (flag) break;
         }

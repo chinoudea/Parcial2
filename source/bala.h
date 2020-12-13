@@ -14,11 +14,10 @@ public:
     double posicionY;
     double rangoDetonacion;
     double g = 9.81;
+    double pi = 2*acos(0.0);
     Bala();
     Bala(double posIniX, double posIniY, double rango);
     bool sensarCercania(double X, double Y);
-    double calcularX(double t);
-    double calcularY(double t);
     void calcularPosicion(double *t);
 private:
     double posInicialX;
