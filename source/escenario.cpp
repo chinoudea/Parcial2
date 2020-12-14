@@ -71,19 +71,22 @@ void Escenario::simularDefensivos()
 {
     int count=0, anguloSemilla;
     double factor = 0.025;
-    // Se crea la bala defensiva
-    Bala defensiva = Bala(c_defensivo.posicionX, c_defensivo.posicionY, (factor * distancia));
     bool flag;
+    double velSemilla ;
+    // Se crea la bala ofensiva
+    Bala defensiva = Bala(c_defensivo.posicionX, c_defensivo.posicionY, (factor * distancia));
+    // Se valida el angulo al objetivo, se compara con 45 por ser el angulo de mayor alcance.
     if (anguloToOfensivo>45) anguloSemilla=int(ceil(anguloToOfensivo));
-    else anguloSemilla=35;
-    //Para generar los 3 disparon se define un set angulos 45, 50 y 60
-    //Se tienen conocidos el angulo y las alturas; Se calcularan los Vo requeridos
-    //Se itera en los 3 angulos definidos
+    else anguloSemilla=45;
+    //Se itera en 3 angulos a partir de la semilla
     for (int i=anguloSemilla; count<3; i+=5) {
         flag = false;
         defensiva.anguloInicial = 180 - i;
+        // Para el angulo definido se obtiene la velocidad para el alcance maximo en X.
+        if (anguloToOfensivo<0) velSemilla=0.1;
+        else velSemilla = sqrt(((distancia-defensiva.rangoDetonacion)*g)/sin(i*pi/180));
         //Se itera en velocidad inicial
-        for (double v=0.1; ; v+=0.1) {
+        for (double v=velSemilla; ; v+=0.1) {
             defensiva.velocidadInicial = v;
             //Se itera en tiempo
             for (tiempo=0.1; ; tiempo+=0.01) {
@@ -98,7 +101,7 @@ void Escenario::simularDefensivos()
                     break;
                 }
                 // Si la posicion en X ya supera la distancia mas el rango de daño, se aborta la iteracion
-                if (defensiva.posicionX < (c_ofensivo.posicionX + defensiva.rangoDetonacion)) break;
+                if (defensiva.posicionX > (c_defensivo.posicionX + defensiva.rangoDetonacion)) break;
             }
             // Si ya se encontro resultado se deja de iterar en velocidad.
             if (flag) break;
@@ -107,7 +110,6 @@ void Escenario::simularDefensivos()
     // Se da tiempo al usuario para que lea los resultados
     cout << endl;
     system("PAUSE");
-
 }
 
 void Escenario::simularDefensivos(bool protegerOfensivo)
