@@ -1,9 +1,10 @@
 #ifndef ESCENARIO_H
 #define ESCENARIO_H
 
+#include <mortero.h>
 #include <iostream>
 #include <cmath>
-#include <mortero.h>
+
 
 using namespace std;
 
@@ -25,6 +26,8 @@ public:
     void simularDefensivos();
     void simularDefensivos(bool);
     void simularOfensivoEfectivo();
+    void simular1();
+    void simular2();
 private:
     int angTest[3]={45, 50, 60};
 };

@@ -5,6 +5,7 @@ Escenario::Escenario()
 {
 
 }
+
 Escenario::Escenario(double dist)
 {
     distancia = dist;
@@ -20,6 +21,18 @@ Escenario::Escenario(double dist, double alt_ofensivo, double alt_defensivo) {
     c_defensivo = Mortero(distancia, alt_defensivo);
     anguloToDefensivo = atan((c_defensivo.posicionY-c_ofensivo.posicionY)/distancia)*(180/pi);
     anguloToOfensivo = atan((c_ofensivo.posicionY-c_defensivo.posicionY)/distancia)*(180/pi);
+}
+
+void Escenario::simular1()
+{
+    c_ofensivo.armarMortero(0.05*distancia);
+    c_ofensivo.simularDisparo(&c_defensivo);
+}
+
+void Escenario::simular2()
+{
+    c_defensivo.armarMortero(0.025*distancia);
+    c_defensivo.simularDisparo(&c_ofensivo);
 }
 
 void Escenario::simularOfensivos()
@@ -118,6 +131,9 @@ void Escenario::simularDefensivos()
     // Se da tiempo al usuario para que lea los resultados
     cout << endl;
     system("PAUSE");
+    c_defensivo.armarMortero(0.025*distancia);
+    c_defensivo.simularDisparo(&c_ofensivo);
+
 }
 
 void Escenario::simularDefensivos(bool protegerOfensivo)

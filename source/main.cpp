@@ -54,10 +54,10 @@ void playOption(int option) {
     // Se valida la opcion ingresada
     switch (option) {
         case 1:
-            miEscenario.simularOfensivos();
+            miEscenario.simular1();
             break;
         case 2:
-            miEscenario.simularDefensivos();
+            miEscenario.simular2();
             break;
         case 3:
             miEscenario.simularDefensivos(false);
