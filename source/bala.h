@@ -13,8 +13,6 @@ public:
     double posicionX;
     double posicionY;
     double rangoDetonacion;
-    double g = 9.81;
-    double pi = 2*acos(0.0);
     Bala();
     Bala(double posIniX, double posIniY, double rango);
     Bala(double posIniX, double posIniY, double rango, double velIni, double angIni);
@@ -23,6 +21,8 @@ public:
 private:
     double posInicialX;
     double posInicialY;
+    double g = 9.81;
+    double pi = 2*acos(0.0);
 };
 
 #endif // BALA_H

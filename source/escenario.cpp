@@ -35,107 +35,6 @@ void Escenario::simular2()
     c_defensivo.simularDisparo(&c_ofensivo);
 }
 
-void Escenario::simularOfensivos()
-{
-    int count=0, anguloSemilla;
-    double factor = 0.05;
-    bool flag;
-    double velSemilla ;
-    // Se crea la bala ofensiva
-    Bala ofensiva = Bala(c_ofensivo.posicionX, c_ofensivo.posicionY, (factor * distancia));
-    // Se valida el angulo al objetivo, se compara con 45 por ser el angulo de mayor alcance.
-    if (anguloToDefensivo>45) anguloSemilla=int(ceil(anguloToDefensivo));
-    else anguloSemilla=45;
-    // Se imprimen resultados
-    system("CLS");
-    cout << "\t********************* RESULTADOS ********************* " << endl << endl;
-    //Se itera en 3 angulos a partir de la semilla
-    for (int i=anguloSemilla; count<3; i+=5) {
-        flag = false;
-        ofensiva.anguloInicial = i;
-        // Para el angulo definido se obtiene la velocidad para el alcance maximo en X.
-        if (anguloToDefensivo<0) velSemilla=0.1;
-        else velSemilla = sqrt(((distancia/2)*g)/sin(i*pi/180));
-        //Se itera en velocidad inicial
-        for (double v=velSemilla; ; v+=0.1) {
-            ofensiva.velocidadInicial = v;
-            //Se itera en tiempo
-            for (tiempo=0.1; ; tiempo+=0.01) {
-                ofensiva.calcularPosicion(&tiempo);
-                // Se limita para que el escenario tenga piso en 0, asi que si se dan valores negativos no se tienen en cuenta.
-                if (ofensiva.posicionY<0) break;
-                // Se valida la cercania al objetivo
-                if (ofensiva.sensarCercania(c_defensivo.posicionX, c_defensivo.posicionY)) {
-                    flag = true;
-                    cout << "Para un disparo ofensivo con angulo " << ofensiva.anguloInicial << " y velocidad " << ofensiva.velocidadInicial << endl;
-                    cout << "se logra generar danio en X=" << ofensiva.posicionX << " y Y=" << ofensiva.posicionY << " en tiempo " << tiempo << " segundos."<<endl<<endl;
-                    count++;
-                    break;
-                }
-                // Si la posicion en X ya supera la distancia mas el rango de daño, se aborta la iteracion
-                if (ofensiva.posicionX > (c_defensivo.posicionX + ofensiva.rangoDetonacion)) break;
-            }
-            // Si ya se encontro resultado se deja de iterar en velocidad.
-            if (flag) break;
-        }
-    }
-    // Se da tiempo al usuario para que lea los resultados
-    cout << endl;
-    system("PAUSE");
-}
-
-void Escenario::simularDefensivos()
-{
-    int count=0, anguloSemilla;
-    double factor = 0.025;
-    bool flag;
-    double velSemilla ;
-    // Se crea la bala ofensiva
-    Bala defensiva = Bala(c_defensivo.posicionX, c_defensivo.posicionY, (factor * distancia));
-    // Se valida el angulo al objetivo, se compara con 45 por ser el angulo de mayor alcance.
-    if (anguloToOfensivo>45) anguloSemilla=int(ceil(anguloToOfensivo));
-    else anguloSemilla=45;
-    // Se imprimen resultados
-    system("CLS");
-    cout << "\t********************* RESULTADOS ********************* " << endl << endl;
-    //Se itera en 3 angulos a partir de la semilla
-    for (int i=anguloSemilla; count<3; i+=5) {
-        flag = false;
-        defensiva.anguloInicial = 180 - i;
-        // Para el angulo definido se obtiene la velocidad para el alcance maximo en X.
-        if (anguloToOfensivo<0) velSemilla=0.1;
-        else velSemilla = sqrt(((distancia/2)*g)/sin(i*pi/180));
-        //Se itera en velocidad inicial
-        for (double v=velSemilla; ; v+=0.1) {
-            defensiva.velocidadInicial = v;
-            //Se itera en tiempo
-            for (tiempo=0.1; ; tiempo+=0.01) {
-                defensiva.calcularPosicion(&tiempo);
-                // Se limita para que el escenario tenga piso en 0, asi que si se dan valores negativos no se tienen en cuenta.
-                if (defensiva.posicionY<0) break;
-                // Se valida la cercania al objetivo
-                if (defensiva.sensarCercania(c_ofensivo.posicionX, c_ofensivo.posicionY)) {
-                    flag = true;
-                    cout << "Para un disparo defensivo con angulo " << defensiva.anguloInicial << " y velocidad " << defensiva.velocidadInicial << endl;
-                    cout << "se logra generar danio en X=" << defensiva.posicionX << " y Y=" << defensiva.posicionY << " en tiempo " << tiempo << " segundos."<<endl<<endl;
-                    count++;
-                    break;
-                }
-                // Si la posicion en X ya supera la distancia mas el rango de daño, se aborta la iteracion
-                if (defensiva.posicionX > (c_defensivo.posicionX + defensiva.rangoDetonacion)) break;
-            }
-            // Si ya se encontro resultado se deja de iterar en velocidad.
-            if (flag) break;
-        }
-    }
-    // Se da tiempo al usuario para que lea los resultados
-    cout << endl;
-    system("PAUSE");
-    c_defensivo.armarMortero(0.025*distancia);
-    c_defensivo.simularDisparo(&c_ofensivo);
-
-}
-
 void Escenario::simularDefensivos(bool protegerOfensivo)
 {
     double Voo, angO, tiempoOfensivo, tiempoOfensivoEfectivo;
@@ -319,7 +218,7 @@ void Escenario::simularOfensivoEfectivo()
                 system("CLS");
                 cout << "\t********************* RESULTADOS ********************* " << endl << endl;
                 cout << "Los parametros indicados no pueden evitar el ataque del canion ofensivo." << endl;
-                cout << "La bala ofensiva sefuira su curso y hara danio al canion defensivo." << endl;
+                cout << "La bala ofensiva seguira su curso y hara danio al canion defensivo." << endl;
                 cout << "Tras recorrer " << ofensiva.posicionX << " m en el eje X y a una altura de " << ofensiva.posicionY << " m en un tiempo de "  << tiempoOfensivoEfectivo << " s." << endl;
             } else { // Si puede evitar el ataque ofensivo
                 //Se verifica si hay tiempo de reaccionar con una bala q neutralice la defensa, ya que la informacion llega con un segundo de retraso.
