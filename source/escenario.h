@@ -19,6 +19,8 @@ public:
     double tiempo;
     double g = 9.81;
     double pi = 2*acos(0.0);
+    double anguloToDefensivo;
+    double anguloToOfensivo;
     void simularOfensivos();
     void simularDefensivos();
     void simularDefensivos(bool);

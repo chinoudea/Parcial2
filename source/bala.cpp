@@ -39,7 +39,6 @@ bool Bala::sensarCercania(double X, double Y)
     }
 
 void Bala::calcularPosicion(double* t) {
-    double temp = cos(anguloInicial*pi/180);
     posicionX = posInicialX + (velocidadInicial * cos(anguloInicial*pi/180)) * (*t);
     posicionY = posInicialY + (velocidadInicial * sin(anguloInicial*pi/180)) * (*t) - (g*pow((*t),2))/2;
 }

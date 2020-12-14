@@ -10,40 +10,51 @@ Escenario::Escenario(double dist)
     distancia = dist;
     c_ofensivo =  Mortero();
     c_defensivo = Mortero(distancia, 0);
+    anguloToDefensivo = 0;
+    anguloToOfensivo = 0;
 }
 
 Escenario::Escenario(double dist, double alt_ofensivo, double alt_defensivo) {
     distancia = dist;
     c_ofensivo = Mortero(0, alt_ofensivo);
     c_defensivo = Mortero(distancia, alt_defensivo);
+    anguloToDefensivo = atan((c_defensivo.posicionY-c_ofensivo.posicionY)/distancia)*(180/pi);
+    anguloToOfensivo = atan((c_ofensivo.posicionY-c_defensivo.posicionY)/distancia)*(180/pi);
 }
 
 void Escenario::simularOfensivos()
 {
+    int count=0, anguloSemilla;
     double factor = 0.05;
+    bool flag;
+    double velSemilla ;
     // Se crea la bala ofensiva
     Bala ofensiva = Bala(c_ofensivo.posicionX, c_ofensivo.posicionY, (factor * distancia));
-    bool flag;
-    //Para generar los 3 disparon se define un set angulos 45, 50 y 60
-    //Se tienen conocidos el angulo y las alturas; Se calcularan los Vo requeridos
-    //Se itera en los 3 angulos definidos
-    for (int i=0; i<3; i++) {
+    // Se valida el angulo al objetivo, se compara con 45 por ser el angulo de mayor alcance.
+    if (anguloToDefensivo>45) anguloSemilla=int(ceil(anguloToDefensivo));
+    else anguloSemilla=45;
+    //Se itera en 3 angulos a partir de la semilla
+    for (int i=anguloSemilla; count<3; i+=5) {
         flag = false;
-        ofensiva.anguloInicial = angTest[i];
+        ofensiva.anguloInicial = i;
+        // Para el angulo definido se obtiene la velocidad para el alcance maximo en X.
+        if (anguloToDefensivo<0) velSemilla=0.1;
+        else velSemilla = sqrt(((distancia-ofensiva.rangoDetonacion)*g)/sin(i*pi/180));
         //Se itera en velocidad inicial
-        for (double v=0.1; ; v+=0.1) {
+        for (double v=velSemilla; ; v+=0.1) {
             ofensiva.velocidadInicial = v;
             //Se itera en tiempo
             for (tiempo=0.1; ; tiempo+=0.01) {
                 ofensiva.calcularPosicion(&tiempo);
+                // Se limita para que el escenario tenga piso en 0, asi que si se dan valores negativos no se tienen en cuenta.
+                if (ofensiva.posicionY<0) break;
                 // Se valida la cercania al objetivo
                 if (ofensiva.sensarCercania(c_defensivo.posicionX, c_defensivo.posicionY)) {
                     flag = true;
-                    cout << "Para angulo " << angTest[i] << " y velocidad " << v << " se logra generar danio en X=" << ofensiva.posicionX << " y Y=" << ofensiva.posicionY << " en tiempo " << tiempo << " segundos."<<endl;
+                    cout << "Para angulo " << i << " y velocidad " << v << " se logra generar danio en X=" << ofensiva.posicionX << " y Y=" << ofensiva.posicionY << " en tiempo " << tiempo << " segundos."<<endl;
+                    count++;
                     break;
                 }
-                // Se limita para que el escenario tenga piso en 0, asi que si se dan valores negativos no se tienen en cuenta.
-                if (ofensiva.posicionY<0) break;
                 // Si la posicion en X ya supera la distancia mas el rango de daño, se aborta la iteracion
                 if (ofensiva.posicionX > (c_defensivo.posicionX + ofensiva.rangoDetonacion)) break;
             }
@@ -58,30 +69,34 @@ void Escenario::simularOfensivos()
 
 void Escenario::simularDefensivos()
 {
+    int count=0, anguloSemilla;
     double factor = 0.025;
     // Se crea la bala defensiva
     Bala defensiva = Bala(c_defensivo.posicionX, c_defensivo.posicionY, (factor * distancia));
     bool flag;
+    if (anguloToOfensivo>45) anguloSemilla=int(ceil(anguloToOfensivo));
+    else anguloSemilla=35;
     //Para generar los 3 disparon se define un set angulos 45, 50 y 60
     //Se tienen conocidos el angulo y las alturas; Se calcularan los Vo requeridos
     //Se itera en los 3 angulos definidos
-    for (int i=0; i<3; i++) {
+    for (int i=anguloSemilla; count<3; i+=5) {
         flag = false;
-        defensiva.anguloInicial = 180 - angTest[i];
+        defensiva.anguloInicial = 180 - i;
         //Se itera en velocidad inicial
         for (double v=0.1; ; v+=0.1) {
             defensiva.velocidadInicial = v;
             //Se itera en tiempo
             for (tiempo=0.1; ; tiempo+=0.01) {
                 defensiva.calcularPosicion(&tiempo);
+                // Se limita para que el escenario tenga piso en 0, asi que si se dan valores negativos no se tienen en cuenta.
+                if (defensiva.posicionY<0) break;
                 // Se valida la cercania al objetivo
                 if (defensiva.sensarCercania(c_ofensivo.posicionX, c_ofensivo.posicionY)) {
                     flag = true;
-                    cout << "Para angulo " << angTest[i] << " y velocidad " << v << " se logra generar danio en X=" << defensiva.posicionX << " y Y=" << defensiva.posicionY << " en tiempo " << tiempo << " segundos."<<endl;
+                    cout << "Para angulo " << i << " y velocidad " << v << " se logra generar danio en X=" << defensiva.posicionX << " y Y=" << defensiva.posicionY << " en tiempo " << tiempo << " segundos."<<endl;
+                    count++;
                     break;
                 }
-                // Se limita para que el escenario tenga piso en 0, asi que si se dan valores negativos no se tienen en cuenta.
-                if (defensiva.posicionY<0) break;
                 // Si la posicion en X ya supera la distancia mas el rango de daño, se aborta la iteracion
                 if (defensiva.posicionX < (c_ofensivo.posicionX + defensiva.rangoDetonacion)) break;
             }
@@ -202,7 +217,9 @@ void Escenario::simularOfensivoEfectivo()
 
 {
     double inputVelocidad, inputAngulo;
-    double tiempoOfensivo, tiempoOfensivoEfectivo, tiempoDefensivo, tiempoDefensivoEfectivo;
+    double tiempoOfensivo, tiempoOfensivoEfectivo, tiempoDefensivo, tiempoDefensivoEfectivo,velMinInterseccion;
+    int anguloIntersectado;
+    int count = 0;
     bool ofensivoEfectivo = false;
     bool defensivoEfectivo = false;
     bool neutralizadorEfectivo = false;
@@ -240,7 +257,7 @@ void Escenario::simularOfensivoEfectivo()
             cout << "Indique el angulo en grados del disparo: ";
             cin >> inputAngulo;
             // Se crea la bala defensiva
-            Bala defensiva = Bala(c_defensivo.posicionX, c_defensivo.posicionY, (0.025 * distancia), inputVelocidad, inputAngulo);
+            Bala defensiva = Bala(c_defensivo.posicionX, c_defensivo.posicionY, (0.025 * distancia), inputVelocidad, (180 - inputAngulo));
             //Se valida si los parametros defensivos si evitarian ataque.
             for (tiempo=0.1; ; tiempo+=0.01) {
                 tiempoOfensivo = tiempo + 2; // La bala ofensiva ya lleva 2 segundos en vuelo
@@ -251,8 +268,12 @@ void Escenario::simularOfensivoEfectivo()
                     // Si el tiempo logrado es mayor al tiempo en el que el cañon ofensivo logra hacer daño, no sirven estos parametros.
                     if ((tiempo + 2) >= tiempoOfensivoEfectivo ) break;
                     defensivoEfectivo = true;
-                    // Se guarda el tiempo y posicion en el que la defensa seria efectiva
+                    // Se guarda el tiempo en el que la defensa seria efectiva
                     tiempoDefensivoEfectivo = tiempo;
+                    // Se calcula el angulo donde la defensa es efectiva segun cañon ofensivo.
+                    anguloIntersectado = int(atan(defensiva.posicionY/(distancia-defensiva.posicionX)) * (180/pi)) - 1;
+                    // Para evitar iteraciones muy largas, se calcula la velocidad en linea recta al punto de interseccion.
+                    velMinInterseccion = (abs(sqrt(pow(defensiva.posicionY,2)+pow(defensiva.posicionX,2))) / (tiempoDefensivoEfectivo-1));
                     break;
                 }
                 // Se limita para que el escenario tenga piso en 0, asi que si se dan valores negativos no se tienen en cuenta.
@@ -269,33 +290,36 @@ void Escenario::simularOfensivoEfectivo()
                     cout << endl << "No es posible neutralizar la defensa con esos parametros." << endl;
                 } else {
                     // Se imprimen resultados
-                    cout << endl;
+                    system("CLS");
+                    cout << "\t********************* RESULTADOS ********************* " << endl << endl;
                     cout << "Para un disparo ofensivo con angulo " << ofensiva.anguloInicial << " y velocidad " << ofensiva.velocidadInicial << endl;
-                    cout << "Se activo un disparo defensivo con angulo " << defensiva.anguloInicial << " y velocidad " << defensiva.velocidadInicial << endl;
+                    cout << "Se activo un disparo defensivo con angulo " << 180 - defensiva.anguloInicial << " y velocidad " << defensiva.velocidadInicial << endl;
                     cout << "Para lograr neutralizar la defensa se presentan las siguientes opciones:" << endl;
                     // Se crea bala para neutralizar defensa.
                     Bala neutralizadora = Bala ( c_ofensivo.posicionX, c_ofensivo.posicionY, (0.005*distancia));
                     // Se iterara en varios angulos para ofrecer varias opciones de neutralizacion
-                    for (int i=0; i<3; i++) {
+                    for (int i=anguloIntersectado; count<3; i--) {
                         neutralizadorEfectivo = false;
-                        neutralizadora.anguloInicial = angTest[i];
+                        neutralizadora.anguloInicial = i;
                         //Se itera en velocidad inicial
-                        for (double v=0.1; ; v+=0.01) {
+                        for (double v=velMinInterseccion; v<(10*velMinInterseccion); v+=0.1) {
                             neutralizadora.velocidadInicial = v;
                             //Se itera en tiempo
                             for (tiempo=0.1; ; tiempo+=0.01) {
                                 tiempoDefensivo = tiempo + 1; // La bala defensiva ya lleva 1 segundo en vuelo.
+                                // Si el tiempo logrado es mayor al tiempo en el que el cañon defensivo logra hacer daño, no sirven estos parametros.
+                                if (tiempoDefensivo >= tiempoDefensivoEfectivo ) break;
                                 neutralizadora.calcularPosicion(&tiempo);
                                 defensiva.calcularPosicion(&tiempoDefensivo);
                                 // Se valida la cercania al objetivo
                                 if (neutralizadora.sensarCercania(defensiva.posicionX, defensiva.posicionY)) {
-                                    // Si el tiempo logrado es mayor al tiempo en el que el cañon defensivo logra hacer daño, no sirven estos parametros.
-                                    if (tiempoDefensivo >= tiempoDefensivoEfectivo ) break;
                                     neutralizadorEfectivo = true;
+                                    count++;
                                     cout << endl;
-                                    cout << "Disparo con un angulo de " << neutralizadora.anguloInicial << " grados y velocidad inicial de " << neutralizadora.velocidadInicial << " m/s" << endl;
-                                    cout << "que logra evitar el disparo defensivo en las coordenas X= " << neutralizadora.posicionX << " y Y= " << neutralizadora.posicionY << " en un tiempo de " << tiempo + 3 << " s despues de disparada la bala ofensiva inicial." <<endl;
-                                    cout << "La bala defensiva logra recorrer " << (distancia-defensiva.posicionX) << " m  en el eje X y estaba a una altura de " << defensiva.posicionY << " m" << endl;
+                                    cout << "\tDisparo con un angulo de " << neutralizadora.anguloInicial << " grados y velocidad inicial de " << neutralizadora.velocidadInicial << " m/s" << endl;
+                                    cout << "\tque logra evitar el disparo defensivo en las coordenas X= " << neutralizadora.posicionX << " y Y= " << neutralizadora.posicionY << endl;
+                                    cout << "\ten un tiempo de " << tiempo + 3 << " s despues de disparada la bala ofensiva inicial." <<endl;
+                                    cout << "\tLa bala defensiva logra recorrer " << (distancia-defensiva.posicionX) << " m  en el eje X y estaba a una altura de " << defensiva.posicionY << " m" << endl;
                                 }
                                 // Se limita para que el escenario tenga piso en 0, asi que si se dan valores negativos no se tienen en cuenta.
                                 if (neutralizadora.posicionY<0) break;
@@ -308,8 +332,10 @@ void Escenario::simularOfensivoEfectivo()
                     }
                     // Se da informacion sobre recorrido de bala ofensiva.
                     ofensiva.calcularPosicion(&tiempoOfensivoEfectivo);
-                    cout << "Con cualqiera de las opciones anteriores la bala ofensiva puede seguir su curso y hara daño al canion defensivo." << endl;
+                    cout << endl;
+                    cout << "Con cualqiera de las opciones anteriores la bala ofensiva puede seguir su curso y hara danio al canion defensivo." << endl;
                     cout << "Tras recorrer " << ofensiva.posicionX << " m en el eje X y a una altura de " << ofensiva.posicionY << " m en un tiempo de "  << tiempoOfensivoEfectivo << " s." << endl;
+                    cout << endl;
                     system("PAUSE");
                 }
             }
